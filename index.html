@@ -414,10 +414,14 @@
       border-top: 1px solid #EEF1F4;
       padding: 14px 20px;
       display: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
       gap: 12px;
       z-index: 1000;
       box-shadow: 0 -8px 32px rgba(0,0,0,0.08);
     }
+    .sticky-cta.show { opacity: 1; pointer-events: auto; }
     @media (max-width: 768px) {
       .sticky-cta { display: flex; }
       .hero-img-wrap { display: none; }
@@ -1284,15 +1288,27 @@ ${message || 'No additional notes.'}
     observer.observe(el);
   });
 
-  // Hide sticky CTA when final CTA section is visible
-  const finalCTA = document.querySelector('.final-cta');
+  // Hide sticky CTA when hero section is visible
   const stickyCTA = document.getElementById('sticky-cta');
+  const heroSection = document.querySelector('.hero');
+
   const stickyObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (stickyCTA) stickyCTA.style.display = entry.isIntersecting ? 'none' : 'flex';
+      if (!stickyCTA) return;
+
+      if (entry.isIntersecting) {
+        // Hero visible → hide CTA
+        stickyCTA.classList.remove('show');
+        stickyCTA.style.display = 'none';
+      } else {
+        // Scrolled past hero → show CTA
+        stickyCTA.style.display = 'flex';
+        setTimeout(() => stickyCTA.classList.add('show'), 10);
+      }
     });
-  });
-  if (finalCTA && stickyCTA) stickyObserver.observe(finalCTA);
+  }, { threshold: 0.3 });
+
+  if (heroSection && stickyCTA) stickyObserver.observe(heroSection);
 </script>
 </body>
 </html>
